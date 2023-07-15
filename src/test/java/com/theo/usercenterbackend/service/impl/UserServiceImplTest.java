@@ -1,5 +1,4 @@
 package com.theo.usercenterbackend.service.impl;
-import java.util.Date;
 
 import com.theo.usercenterbackend.model.domain.User;
 import org.junit.jupiter.api.Assertions;
@@ -7,9 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
-import javax.jws.soap.SOAPBinding;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class UserServiceImplTest {
@@ -18,7 +15,7 @@ class UserServiceImplTest {
     @Test
     public void testAddUser(){
         User user = new User();
-        user.setUsername("Theo");
+        user.setUserName("Theo");
         user.setUserAccount("12344");
         user.setAvatarUrl("https://img.yzcdn.cn/vant/logo.png");
         user.setGender(0);
@@ -34,10 +31,11 @@ class UserServiceImplTest {
 
     @Test
     void userRegister() {
-        String Accuont = "Theo-Chan";
+        String Accuont = "fake_Chan_1";
         String PassWord = "12345678";
         String checkPassWord = "12345678";
         Long result = userService.userRegister(Accuont, PassWord, checkPassWord);
+        Assertions.assertEquals(2,result);
     }
 
     @Test

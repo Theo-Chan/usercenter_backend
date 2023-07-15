@@ -1,19 +1,19 @@
 package com.theo.usercenterbackend.controller;
 
-import com.sun.scenario.effect.impl.prism.ps.PPSBlend_LIGHTENPeer;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.theo.usercenterbackend.model.domain.User;
 import com.theo.usercenterbackend.model.domain.request.userLoginRequest;
 import com.theo.usercenterbackend.model.domain.request.userRegisterRequest;
 import com.theo.usercenterbackend.service.UserService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import sun.net.idn.Punycode;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.theo.usercenterbackend.constant.userConstant.USER_LOGIN_STATE;
 
 /**
  * @author Theo
@@ -51,5 +51,51 @@ public class userController {
             return null;
         }
         return  userService.userLogin(userAccount, userPassword,request);
+    }
+
+
+    @PostMapping("/search")
+    public List<User> searchUser(String userName,HttpServletRequest request){
+        //todo 返回类型问题
+        if (!isAdmin(request)){
+            return new ArrayList<>();
+        }
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        //接收userName
+        if (StringUtils.isNotBlank(userName)){
+            userQueryWrapper.like("userName",userName);
+        }
+        //todo 返回的数据没有脱敏
+        return userService.list(userQueryWrapper);
+    }
+    /**
+     *
+     * 删除需要管理员权限
+     * @param id
+     * @return
+     */
+    @GetMapping("/delete")
+    public boolean searchUser(Long id,HttpServletRequest request){
+        if (!isAdmin(request)){
+            return false;
+        }
+        if (id <= 0){
+            return false;
+        }
+        //接收userName
+       return userService.removeById(id);
+    }
+
+    /**
+     * 鉴权函数
+     */
+    private boolean isAdmin(HttpServletRequest request){
+        //todo 搞清楚存的是什么
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        if (user == null || user.getUserRole() != 1){
+            return false;
+        }
+        return true;
     }
 }
