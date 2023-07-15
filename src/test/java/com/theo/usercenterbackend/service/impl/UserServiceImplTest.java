@@ -31,4 +31,16 @@ class UserServiceImplTest {
         Assertions.assertTrue(result);
 
     }
+
+    @Test
+    void userRegister() {
+        String Accuont = "Theo-Chan";
+        String PassWord = "12345678";
+        String checkPassWord = "12345678";
+        Long result = userService.userRegister(Accuont, PassWord, checkPassWord);
+    }
+
+    @Test
+    void userLogin() {
+    }
 }
