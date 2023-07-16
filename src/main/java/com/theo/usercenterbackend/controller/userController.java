@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.theo.usercenterbackend.constant.userConstant.USER_LOGIN_STATE;
 
@@ -65,8 +66,9 @@ public class userController {
         if (StringUtils.isNotBlank(userName)){
             userQueryWrapper.like("userName",userName);
         }
-        //todo 返回的数据没有脱敏
-        return userService.list(userQueryWrapper);
+        List<User> userList = userService.list(userQueryWrapper);
+        //Java 8 新特性
+        return userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
     }
     /**
      *
