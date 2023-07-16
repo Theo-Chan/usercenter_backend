@@ -54,6 +54,19 @@ public class userController {
         return  userService.userLogin(userAccount, userPassword,request);
     }
 
+    @GetMapping("/current")
+    public User getCurrentUser(HttpServletRequest request){
+        //获取前端session
+        Object attribute = request.getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) attribute;
+        if (currentUser == null){
+            return null;
+        }
+        //todo 没有对用户的状态判断
+        //这里可以选择直接从缓存中获取用户信息也可以查询数据库 但是处于时效性的考虑选择查库
+        User user = userService.getById(currentUser.getId());
+        return userService.getSafetyUser(user);
+    }
 
     @PostMapping("/search")
     public List<User> searchUser(String userName,HttpServletRequest request){
@@ -70,6 +83,7 @@ public class userController {
         //Java 8 新特性
         return userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
     }
+
     /**
      *
      * 删除需要管理员权限
