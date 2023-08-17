@@ -34,7 +34,7 @@ class UserServiceImplTest {
         String Accuont = "fake_Chan_1";
         String PassWord = "12345678";
         String checkPassWord = "12345678";
-        Long result = userService.userRegister(Accuont, PassWord, checkPassWord);
+        Long result = userService.userRegister(Accuont, PassWord, checkPassWord, planetCode);
         Assertions.assertEquals(2,result);
     }
 

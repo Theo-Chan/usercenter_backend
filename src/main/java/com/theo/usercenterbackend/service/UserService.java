@@ -13,12 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 public interface UserService extends IService<User> {
     /**
      * 用户注册
-     * @param userAccount 用户昵称
-     * @param userPassword 用户密码
+     *
+     * @param userAccount   用户昵称
+     * @param userPassword  用户密码
      * @param checkPassword 确认密码
+     * @param planetCode    星球编号
      * @return user
      */
-    Long userRegister(String userAccount,String userPassword,String checkPassword);
+    Long userRegister(String userAccount,String userPassword,String checkPassword,String planetCode);
 
     /**
      * 用户登录
@@ -35,4 +37,11 @@ public interface UserService extends IService<User> {
      * @return safetyUser
      */
     User getSafetyUser(User originUser);
+
+    /**
+     * 用户注销
+     * @param request  session
+     * @return
+     */
+    int userLogOut(HttpServletRequest request);
 }

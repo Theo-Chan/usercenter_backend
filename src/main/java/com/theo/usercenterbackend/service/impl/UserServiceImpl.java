@@ -28,14 +28,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private UserMapper userMapper;
     @Override
-    public Long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public Long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
         //非空校验
-        if (StringUtils.isAnyBlank(userAccount,userPassword,checkPassword))
+        if (StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,planetCode))
         {
             return -1L;
         }
         //用户名校验
         if (userAccount.length() < 4){
+            return -1L;
+        }
+
+        if (planetCode.length() > 5){
             return -1L;
         }
         //用户名特殊字符校验
@@ -60,12 +64,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (count > 0){
             return -1L;
         }
+
+        //星球编号重复校验
+        userQueryWrapper = new QueryWrapper<>(null);
+        userQueryWrapper.eq("planetCode", planetCode);
+        count = userMapper.selectCount(userQueryWrapper);
+        if (count > 0) {
+            return -1L;
+        }
+
         //密码加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         //插入数据
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        user.setPlanetCode(planetCode);
         boolean saveResult = this.save(user);
         if (!saveResult){
             return -1L;
@@ -128,10 +142,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setGender(originUser.getGender());
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setPlanetCode(originUser.getPlanetCode());
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
         return safetyUser;
+    }
+
+    @Override
+    public int userLogOut(HttpServletRequest request) {
+        request.removeAttribute(USER_LOGIN_STATE);
+        return 1;
     }
 }
 

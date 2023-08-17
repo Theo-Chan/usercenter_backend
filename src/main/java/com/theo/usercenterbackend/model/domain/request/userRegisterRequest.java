@@ -25,4 +25,6 @@ public class userRegisterRequest implements Serializable{
      * 确认密码
      */
     private String checkPassword;
+
+    private String planetCode;
 }
