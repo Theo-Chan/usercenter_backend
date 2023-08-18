@@ -2,7 +2,9 @@ package com.theo.usercenterbackend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.theo.usercenterbackend.common.BaseResponse;
+import com.theo.usercenterbackend.common.ErrorCode;
 import com.theo.usercenterbackend.common.ResultUtils;
+import com.theo.usercenterbackend.exception.BusinessException;
 import com.theo.usercenterbackend.model.domain.User;
 import com.theo.usercenterbackend.model.domain.request.userLoginRequest;
 import com.theo.usercenterbackend.model.domain.request.userRegisterRequest;
@@ -11,9 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.security.sasl.Sasl;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,14 +32,14 @@ public class userController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody userRegisterRequest userRegisterRequest){
         if (userRegisterRequest == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求为空");
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         String planetCode = userRegisterRequest.getPlanetCode();
         if (StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,planetCode)){
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"有一项为空");
         }
         Long userId = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         return ResultUtils.success(userId);
@@ -53,19 +53,19 @@ public class userController {
         String userAccount = userloginrequest.getUserAccount();
         String userPassword = userloginrequest.getUserPassword();
         if (StringUtils.isAnyBlank(userAccount,userPassword)){
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"有一项为空");
         }
         User user = userService.userLogin(userAccount, userPassword,request);
         return ResultUtils.success(user);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/logout")
     public BaseResponse<Integer> userLogOut(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
-        Integer code = userService.userLogOut(request);
-        return ResultUtils.success(code);
+         userService.userLogOut(request);
+        return ResultUtils.success(0);
     }
 
     @GetMapping("/current")
@@ -87,7 +87,7 @@ public class userController {
     public  BaseResponse<List<User>> searchUser(String userName,HttpServletRequest request){
         //todo 返回类型问题
         if (!isAdmin(request)){
-            return new ArrayList<>();
+            return null;
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         //接收userName
@@ -110,10 +110,10 @@ public class userController {
     @GetMapping("/delete")
     public  BaseResponse<Boolean> searchUser(Long id,HttpServletRequest request){
         if (!isAdmin(request)){
-            return null;
+            throw new BusinessException(ErrorCode.NO_AUTH);
         }
         if (id <= 0){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //接收userName
         Boolean result = userService.removeById(id);
@@ -123,13 +123,13 @@ public class userController {
     /**
      * 鉴权函数
      */
-    private BaseResponse<Boolean> isAdmin(HttpServletRequest request){
+    private boolean isAdmin(HttpServletRequest request){
         //todo 搞清楚存的是什么
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) userObj;
         if (user == null || user.getUserRole() != 1){
-            return null;
+            return false;
         }
-        return ResultUtils.success(true);
+        return true;
     }
 }
